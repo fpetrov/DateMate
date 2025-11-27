@@ -1,0 +1,111 @@
+# -----------------
+# Python: байткод
+# -----------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# -----------------
+# Виртуальные окружения
+# -----------------
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# -----------------
+# Дистрибутивы / упаковка
+# -----------------
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# -----------------
+# Логи установщика
+# -----------------
+pip-log.txt
+pip-delete-this-directory.txt
+
+# -----------------
+# Тесты / coverage
+# -----------------
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.pytest_cache/
+.hypothesis/
+.pyre/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# -----------------
+# Linter / type checker
+# -----------------
+.ruff_cache/
+.pytype/
+
+# -----------------
+# Django / Flask (пригодится, если будешь использовать)
+# -----------------
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+instance/
+*.sqlite
+
+# -----------------
+# Jupyter Notebook
+# -----------------
+.ipynb_checkpoints/
+
+# -----------------
+# IDE: PyCharm / VS Code / прочие
+# -----------------
+# PyCharm / JetBrains
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# -----------------
+# Файлы окружения
+# -----------------
+.env
+*.env
+*.local
+
+# -----------------
+# ОС: macOS
+# -----------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Иконка в папке
+Icon
+
+# Файлы ресурсов (resource fork)
+._*
+
+# Spotlight и прочее служебное
+.Spotlight-V100
+.Trashes
+
+# Кэш на съёмных дисках
+.fseventsd
+
+# Иногда попадается
+Thumbs.db
