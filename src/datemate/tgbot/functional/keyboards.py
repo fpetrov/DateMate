@@ -32,6 +32,14 @@ def faculty_keyboard(faculties: list[Faculty]) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def photos_keyboard(has_photos: bool) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(text="✅ Готово", callback_data="photos:done"))
+    if not has_photos:
+        builder.row(InlineKeyboardButton(text="⬅️ В меню", callback_data="action:menu"))
+    return builder.as_markup()
+
+
 def candidate_actions(candidate_id: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(

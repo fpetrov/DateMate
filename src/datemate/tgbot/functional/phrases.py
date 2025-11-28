@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Any
 
 
@@ -8,8 +9,10 @@ def __load_phrases__(phrases_path: str) -> Any:
 
 
 class Phrases:
-    def __init__(self, phrases_path: str = 'phrases_ru.json'):
-        self.phrases = __load_phrases__(phrases_path)
+    def __init__(self, phrases_path: str | Path = None):
+        default_path = Path(__file__).resolve().parent.parent / 'phrases' / 'phrases_ru.json'
+        phrases_location = Path(phrases_path) if phrases_path else default_path
+        self.phrases = __load_phrases__(phrases_location)
 
     def __getitem__(self, item):
         return self.phrases[item]
