@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Iterable
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, ForeignKey, Integer, String, Text, BigInteger
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -21,7 +21,7 @@ class UserModel(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    telegram_id = Column(Integer, nullable=False, unique=True, index=True)
+    telegram_id = Column(BigInteger, nullable=False, unique=True, index=True)
     name = Column(String, nullable=False)
     sex = Column(String(1), nullable=False)
     age = Column(Integer, nullable=False)

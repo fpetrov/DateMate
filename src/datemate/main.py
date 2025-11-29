@@ -2,7 +2,9 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio import Redis
 
@@ -24,9 +26,10 @@ async def main() -> None:
     session_factory = await init_db(engine)
 
     redis = Redis.from_url(settings.redis_url)
-    storage = RedisStorage(redis=redis)
+    # storage = RedisStorage(redis=redis)
+    storage = MemoryStorage()
 
-    bot = Bot(settings.bot_token, parse_mode=ParseMode.HTML)
+    bot = Bot(settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=storage)
     dp.include_router(registration_router)
 
@@ -39,7 +42,7 @@ async def main() -> None:
     try:
         await dp.start_polling(bot, phrases=phrases)
     finally:
-        await redis.close()
+        # await redis.close()
         await bot.session.close()
 
 

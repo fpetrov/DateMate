@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Awaitable, Callable, Dict
 
 from aiogram import BaseMiddleware, Bot
@@ -38,11 +39,13 @@ class InterfaceMiddleware(BaseMiddleware):
             core_message = context.get_message()
 
             if (event_instance.date - core_message.date).total_seconds() > 2 * 24 * 60 * 60:
+                logging.log(logging.WARNING, "Deleting old message")
                 await bot.delete_message(chat_id=core_message.chat_id, message_id=core_message.message_id)
                 await self.send_revert_state_message(state, bot, event_instance, context, phrases, user_id)
 
         if not event_is_callback:
             await bot.delete_message(chat_id=event_instance.chat.id, message_id=event_instance.message_id)
+
         return await handler(event, data)
 
     @staticmethod
@@ -57,6 +60,7 @@ class InterfaceMiddleware(BaseMiddleware):
         await state.set_state(None)
 
         new_message = await bot.send_message(event.chat.id, phrases["return_to_menu"])
+        logging.log(logging.WARNING, "Sent new message in revert state")
 
         core_message = CoreMessage(
             new_message.chat.id,

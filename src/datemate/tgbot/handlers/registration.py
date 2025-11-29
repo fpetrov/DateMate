@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 
 from aiogram import F, Router
@@ -37,7 +38,6 @@ async def _show_main_menu(event: Message | CallbackQuery, context: CoreContext, 
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext, context: CoreContext, phrases: Phrases, session) -> None:
     await context.delete_core_message()
-    await state.clear()
     user_repo = UserRepository(session)
     user = await user_repo.get_by_telegram_id(message.from_user.id)
     await _show_main_menu(message, context, phrases, is_registered=user is not None)
@@ -46,7 +46,6 @@ async def cmd_start(message: Message, state: FSMContext, context: CoreContext, p
 @router.callback_query(F.data == "action:menu")
 async def back_to_menu(callback: CallbackQuery, state: FSMContext, context: CoreContext, phrases: Phrases, session) -> None:
     await callback.answer()
-    await state.clear()
     user_repo = UserRepository(session)
     user = await user_repo.get_by_telegram_id(callback.from_user.id)
     await _show_main_menu(callback, context, phrases, is_registered=user is not None)
@@ -191,7 +190,6 @@ async def finish_photos(callback: CallbackQuery, state: FSMContext, context: Cor
         photo_ids=photo_ids,
     )
 
-    await state.clear()
     await _update_dialog_message(
         callback,
         context,
@@ -209,6 +207,7 @@ async def search_profiles(callback: CallbackQuery, context: CoreContext, phrases
         await _update_dialog_message(callback, context, phrases["search"]["not_registered"], reply_markup=keyboards.main_menu())
         return
 
+    logging.log(logging.WARN, f"Searching profiles for {user.telegram_id}")
     await _update_dialog_message(callback, context, phrases["search"]["placeholder"], reply_markup=keyboards.main_menu())
 
 

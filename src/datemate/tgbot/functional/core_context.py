@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict
 
 from aiogram import Bot
@@ -91,9 +92,11 @@ class CoreContext:
                     disable_web_page_preview=disable_web_page_preview,
                 )
                 return core_message
-            except TelegramBadRequest:
+            except TelegramBadRequest as e:
+                logging.error(e.message)
                 target_text = fallback
 
+        logging.log(level=logging.WARNING, msg=f"Creating a new message to {target_text}...")
         new_message = await self.bot.send_message(
             message.chat.id,
             target_text,
