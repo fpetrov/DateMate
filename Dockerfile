@@ -13,4 +13,6 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY src ./src
 
+ENV PYTHONPATH=/app/src
+
 CMD ["python", "-m", "datemate.main"]
