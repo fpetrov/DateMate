@@ -78,7 +78,7 @@ class CoreContext:
     ) -> CoreMessage:
         message = self._event_message(event)
         target_text = text
-        fallback = fallback_text or self.fallback_text
+        fallback = fallback_text if fallback_text is not None else text
 
         if self.message_exists():
             core_message = self.get_message()
@@ -94,19 +94,11 @@ class CoreContext:
                 return core_message
             except TelegramBadRequest as text_error:
                 logging.error(text_error.message)
-                try:
-                    await self.bot.edit_message_caption(
-                        chat_id=core_message.chat_id,
-                        message_id=core_message.message_id,
-                        caption=text,
-                        reply_markup=reply_markup,
-                        parse_mode=parse_mode,
-                    )
+                if text_error.message == "Bad Request: message is not modified":
                     return core_message
-                except TelegramBadRequest as caption_error:
-                    logging.error(caption_error.message)
-                    target_text = fallback
-                    await self.delete_core_message()
+
+                target_text = fallback
+                await self.delete_core_message()
 
         logging.log(level=logging.WARNING, msg=f"Creating a new message to {target_text}...")
         new_message = await self.bot.send_message(
