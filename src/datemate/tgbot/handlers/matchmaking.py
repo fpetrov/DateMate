@@ -29,7 +29,7 @@ async def _show_next_candidate(
             event,
             context,
             phrases["search"]["no_candidates"],
-            reply_markup=keyboards.back_to_menu(),
+            reply_markup=keyboards.back_to_menu(phrases),
         )
         return None
 
@@ -38,7 +38,7 @@ async def _show_next_candidate(
         context,
         candidate,
         phrases,
-        reply_markup=keyboards.candidate_actions(str(candidate.id)),
+        reply_markup=keyboards.candidate_actions(phrases, str(candidate.id)),
     )
     return candidate
 
@@ -55,7 +55,7 @@ async def _show_match_by_index(
     pairs, total = await match_repo.list_matches(user.id, offset=safe_index, limit=1)
 
     if total == 0:
-        await update_dialog_message(event, context, phrases["matches"]["empty"], reply_markup=keyboards.main_menu())
+        await update_dialog_message(event, context, phrases["matches"]["empty"], reply_markup=keyboards.main_menu(phrases))
         return
 
     if not pairs and safe_index >= total:
@@ -63,7 +63,7 @@ async def _show_match_by_index(
             event,
             context,
             phrases["matches"]["out_of_range"],
-            reply_markup=keyboards.matches_navigation(total - 1, total),
+            reply_markup=keyboards.matches_navigation(phrases, total - 1, total),
         )
         return
 
@@ -72,7 +72,7 @@ async def _show_match_by_index(
             event,
             context,
             phrases["matches"]["not_available"],
-            reply_markup=keyboards.matches_navigation(safe_index, total),
+            reply_markup=keyboards.matches_navigation(phrases, safe_index, total),
         )
         return
 
@@ -83,7 +83,7 @@ async def _show_match_by_index(
         other_user,
         phrases,
         match_time=match.created_at,
-        reply_markup=keyboards.matches_navigation(safe_index, total),
+        reply_markup=keyboards.matches_navigation(phrases, safe_index, total),
     )
 
 
@@ -112,7 +112,7 @@ async def search_profiles(callback: CallbackQuery, context: CoreContext, phrases
         return
 
     match_repo = MatchRepository(session)
-    await update_dialog_message(callback, context, phrases["search"]["loading"], reply_markup=keyboards.back_to_menu())
+    await update_dialog_message(callback, context, phrases["search"]["loading"], reply_markup=keyboards.back_to_menu(phrases))
     await _show_next_candidate(callback, context, phrases, match_repo, user)
 
 
@@ -120,14 +120,24 @@ async def search_profiles(callback: CallbackQuery, context: CoreContext, phrases
 async def rate_candidate(callback: CallbackQuery, context: CoreContext, phrases: Phrases, session) -> None:
     parts = callback.data.split(":")
     if len(parts) != 3:
-        await update_dialog_message(callback, context, phrases["search"]["candidate_not_found"], reply_markup=keyboards.back_to_menu())
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["search"]["candidate_not_found"],
+            reply_markup=keyboards.back_to_menu(phrases),
+        )
         return
 
     _, action, candidate_id_raw = parts
     try:
         candidate_id = int(candidate_id_raw)
     except ValueError:
-        await update_dialog_message(callback, context, phrases["search"]["candidate_not_found"], reply_markup=keyboards.back_to_menu())
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["search"]["candidate_not_found"],
+            reply_markup=keyboards.back_to_menu(phrases),
+        )
         return
 
     user_repo = UserRepository(session)
@@ -137,7 +147,12 @@ async def rate_candidate(callback: CallbackQuery, context: CoreContext, phrases:
 
     candidate = await user_repo.get_by_id(candidate_id)
     if candidate is None:
-        await update_dialog_message(callback, context, phrases["search"]["candidate_not_found"], reply_markup=keyboards.back_to_menu())
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["search"]["candidate_not_found"],
+            reply_markup=keyboards.back_to_menu(phrases),
+        )
         return
 
     match_repo = MatchRepository(session)
@@ -231,5 +246,5 @@ async def noop(callback: CallbackQuery) -> None:
 
 @router.message()
 async def undefined(message: Message, context: CoreContext, phrases: Phrases):
-    await update_dialog_message(message, context, phrases["undefined_command"], reply_markup=keyboards.main_menu())
+    await update_dialog_message(message, context, phrases["undefined_command"], reply_markup=keyboards.main_menu(phrases))
 

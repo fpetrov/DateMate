@@ -4,32 +4,33 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from datemate.domain.entities import Faculty
+from datemate.tgbot.functional import LanguagePhrases
 
 
-def main_menu() -> InlineKeyboardMarkup:
+def main_menu(phrases: LanguagePhrases) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="🚀 Заполнить анкету", callback_data="action:register"),
-        InlineKeyboardButton(text="❤️ Смотреть анкеты", callback_data="action:search"),
+        InlineKeyboardButton(text=phrases["keyboards"]["menu"]["register"], callback_data="action:register"),
+        InlineKeyboardButton(text=phrases["keyboards"]["menu"]["search"], callback_data="action:search"),
     )
-    builder.row(InlineKeyboardButton(text="💌 Мои мэтчи", callback_data="action:matches"))
+    builder.row(InlineKeyboardButton(text=phrases["keyboards"]["menu"]["matches"], callback_data="action:matches"))
     return builder.as_markup()
 
 
-def sex_keyboard() -> InlineKeyboardMarkup:
+def sex_keyboard(phrases: LanguagePhrases) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="Парень", callback_data="sex:M"),
-        InlineKeyboardButton(text="Девушка", callback_data="sex:F"),
+        InlineKeyboardButton(text=phrases["keyboards"]["sex"]["male"], callback_data="sex:M"),
+        InlineKeyboardButton(text=phrases["keyboards"]["sex"]["female"], callback_data="sex:F"),
     )
     return builder.as_markup()
 
 
-def search_sex_keyboard() -> InlineKeyboardMarkup:
+def search_sex_keyboard(phrases: LanguagePhrases) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="Парня", callback_data="search_sex:M"),
-        InlineKeyboardButton(text="Девушку", callback_data="search_sex:F"),
+        InlineKeyboardButton(text=phrases["keyboards"]["search_sex"]["male"], callback_data="search_sex:M"),
+        InlineKeyboardButton(text=phrases["keyboards"]["search_sex"]["female"], callback_data="search_sex:F"),
     )
     return builder.as_markup()
 
@@ -42,41 +43,57 @@ def faculty_keyboard(faculties: list[Faculty]) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def photos_keyboard(has_photos: bool) -> InlineKeyboardMarkup:
+def photos_keyboard(phrases: LanguagePhrases, has_photos: bool) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.row(InlineKeyboardButton(text="✅ Готово", callback_data="photos:done"))
+    builder.row(InlineKeyboardButton(text=phrases["keyboards"]["photos"]["done"], callback_data="photos:done"))
     if not has_photos:
-        builder.row(InlineKeyboardButton(text="⬅️ В меню", callback_data="action:menu"))
+        builder.row(InlineKeyboardButton(text=phrases["keyboards"]["back_to_menu"], callback_data="action:menu"))
     return builder.as_markup()
 
 
-def candidate_actions(candidate_id: str) -> InlineKeyboardMarkup:
+def candidate_actions(phrases: LanguagePhrases, candidate_id: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="👎 Пропустить", callback_data=f"rate:skip:{candidate_id}"),
-        InlineKeyboardButton(text="❤️ Лайк", callback_data=f"rate:like:{candidate_id}"),
+        InlineKeyboardButton(
+            text=phrases["keyboards"]["candidate"]["skip"],
+            callback_data=f"rate:skip:{candidate_id}",
+        ),
+        InlineKeyboardButton(
+            text=phrases["keyboards"]["candidate"]["like"],
+            callback_data=f"rate:like:{candidate_id}",
+        ),
     )
-    builder.row(InlineKeyboardButton(text="➡️ Дальше", callback_data=f"search:next:{candidate_id}"))
+    builder.row(
+        InlineKeyboardButton(
+            text=phrases["keyboards"]["candidate"]["next"],
+            callback_data=f"search:next:{candidate_id}",
+        )
+    )
     return builder.as_markup()
 
 
-def back_to_menu() -> InlineKeyboardMarkup:
+def back_to_menu(phrases: LanguagePhrases) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="⬅️ В меню", callback_data="action:menu")
+    builder.button(text=phrases["keyboards"]["back_to_menu"], callback_data="action:menu")
     return builder.as_markup()
 
 
-def verify_actions(request_id: str) -> InlineKeyboardMarkup:
+def verify_actions(phrases: LanguagePhrases, request_id: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="✅ Подтвердить", callback_data=f"approve:{request_id}"),
-        InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject:{request_id}"),
+        InlineKeyboardButton(text=phrases["keyboards"]["verify"]["approve"], callback_data=f"approve:{request_id}"),
+        InlineKeyboardButton(text=phrases["keyboards"]["verify"]["reject"], callback_data=f"reject:{request_id}"),
     )
-    builder.row(InlineKeyboardButton(text="🔄 Обновить список", callback_data="verify:refresh"))
+    builder.row(
+        InlineKeyboardButton(
+            text=phrases["keyboards"]["verify"]["refresh"],
+            callback_data="verify:refresh",
+        )
+    )
     return builder.as_markup()
 
 
-def matches_navigation(current_index: int, total: int) -> InlineKeyboardMarkup:
+def matches_navigation(phrases: LanguagePhrases, current_index: int, total: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     if total:
         builder.row(
@@ -90,5 +107,16 @@ def matches_navigation(current_index: int, total: int) -> InlineKeyboardMarkup:
             ),
         )
 
-    builder.row(InlineKeyboardButton(text="⬅️ В меню", callback_data="action:menu"))
+    builder.row(InlineKeyboardButton(text=phrases["keyboards"]["back_to_menu"], callback_data="action:menu"))
+    return builder.as_markup()
+
+
+def language_keyboard(phrases: LanguagePhrases) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    language_buttons = phrases["keyboards"]["language"]
+    builder.row(
+        InlineKeyboardButton(text=language_buttons["ru"], callback_data="language:ru"),
+        InlineKeyboardButton(text=language_buttons["en"], callback_data="language:en"),
+        InlineKeyboardButton(text=language_buttons["fr"], callback_data="language:fr"),
+    )
     return builder.as_markup()

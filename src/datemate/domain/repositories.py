@@ -40,6 +40,7 @@ class UserRepository:
         name: str,
         sex: str,
         search_sex: str,
+        language: str,
         age: int,
         faculty_id: str,
         description: str,
@@ -52,6 +53,7 @@ class UserRepository:
                 name=name,
                 sex=sex,
                 search_sex=search_sex,
+                language=language,
                 age=age,
                 description=description,
                 faculty_id=faculty_id,
@@ -62,6 +64,7 @@ class UserRepository:
         user.name = name
         user.sex = sex
         user.search_sex = search_sex
+        user.language = language
         user.age = age
         user.description = description
         user.faculty_id = faculty_id

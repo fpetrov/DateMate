@@ -14,39 +14,40 @@ async def update_dialog_message(event: Message | CallbackQuery, context: CoreCon
 
 async def show_main_menu(event: Message | CallbackQuery, context: CoreContext, phrases: Phrases, is_registered: bool) -> None:
     text = phrases["menu"]["registered" if is_registered else "unregistered"]
-    await update_dialog_message(event, context, text, reply_markup=keyboards.main_menu())
+    await update_dialog_message(event, context, text, reply_markup=keyboards.main_menu(phrases))
 
 
-def _sex_label(sex: str | None) -> str:
+def _sex_label(sex: str | None, phrases: Phrases) -> str:
     if sex == "M":
-        return "Парень"
+        return phrases["profile"]["sex_values"]["male"]
     if sex == "F":
-        return "Девушка"
-    return "—"
+        return phrases["profile"]["sex_values"]["female"]
+    return phrases["profile"]["sex_values"]["unknown"]
 
 
-def _search_sex_label(search_sex: str | None) -> str:
+def _search_sex_label(search_sex: str | None, phrases: Phrases) -> str:
     if search_sex == "M":
-        return "Парня"
+        return phrases["profile"]["search_values"]["male"]
     if search_sex == "F":
-        return "Девушку"
-    return "Кого угодно"
+        return phrases["profile"]["search_values"]["female"]
+    return phrases["profile"]["search_values"]["any"]
 
 
-def format_profile_caption(user, match_time: datetime | None = None) -> str:
+def format_profile_caption(user, match_time: datetime | None = None, phrases: Phrases | None = None) -> str:
+    phrases = phrases or Phrases()
     faculty_name = user.faculty.name if getattr(user, "faculty", None) else "—"
 
     caption_lines = [
         f"{user.name}, {user.age}",
-        f"Пол: {_sex_label(user.sex)}",
-        f"Ищу: {_search_sex_label(getattr(user, 'search_sex', None))}",
-        f"Факультет: {faculty_name}",
+        f"{phrases['profile']['sex_label']}: {_sex_label(user.sex, phrases)}",
+        f"{phrases['profile']['search_label']}: {_search_sex_label(getattr(user, 'search_sex', None), phrases)}",
+        f"{phrases['profile']['faculty_label']}: {faculty_name}",
         "",
         user.description or "",
     ]
 
     if match_time:
-        caption_lines.extend(["", match_time.strftime("Совпадение: %d.%m.%Y %H:%M")])
+        caption_lines.extend(["", match_time.strftime(phrases["profile"]["match_time_format"])])
 
     return "\n".join(line for line in caption_lines if line is not None)
 
@@ -59,7 +60,7 @@ async def show_profile(
     reply_markup=None,
     match_time: datetime | None = None,
 ):
-    caption = format_profile_caption(user, match_time=match_time)
+    caption = format_profile_caption(user, match_time=match_time, phrases=phrases)
     if user.photos:
         await context.respond_photo(
             event,
@@ -87,7 +88,7 @@ async def ensure_registered_user(
             event,
             context,
             not_registered_text or phrases["search"]["not_registered"],
-            reply_markup=keyboards.main_menu(),
+            reply_markup=keyboards.main_menu(phrases),
         )
         return None
 

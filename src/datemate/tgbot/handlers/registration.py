@@ -16,6 +16,7 @@ router = Router()
 
 
 class RegistrationState(StatesGroup):
+    language = State()
     name = State()
     sex = State()
     search_sex = State()
@@ -28,11 +29,48 @@ class RegistrationState(StatesGroup):
 @router.callback_query(F.data == "action:register")
 async def start_registration(callback: CallbackQuery, state: FSMContext, context: CoreContext, phrases: Phrases, session) -> None:
     await callback.answer()
-    await state.set_state(RegistrationState.name)
+    await state.set_state(RegistrationState.language)
     user_repo = UserRepository(session)
     user = await user_repo.get_by_telegram_id(callback.from_user.id)
-    prompt = phrases["registration"]["name"]["repeat" if user else "ask"]
-    await update_dialog_message(callback, context, prompt)
+    await state.update_data(existing_user=bool(user))
+    if user:
+        await state.update_data(language=user.language)
+    prompt = phrases["registration"]["language"]["ask"]
+    await update_dialog_message(callback, context, prompt, reply_markup=keyboards.language_keyboard(phrases))
+
+
+@router.callback_query(RegistrationState.language)
+async def set_language(callback: CallbackQuery, state: FSMContext, context: CoreContext, phrases: Phrases, phrases_provider: Phrases) -> None:
+    await callback.answer()
+    if not callback.data or not callback.data.startswith("language:"):
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["registration"]["language"]["invalid"],
+            reply_markup=keyboards.language_keyboard(phrases),
+        )
+        return
+
+    language_code = callback.data.split(":", maxsplit=1)[1]
+    if language_code not in {"ru", "en", "fr"}:
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["registration"]["language"]["invalid"],
+            reply_markup=keyboards.language_keyboard(phrases),
+        )
+        return
+
+    await state.update_data(language=language_code)
+    data = await state.get_data()
+    await state.set_state(RegistrationState.name)
+    localized_phrases = phrases_provider.for_language(language_code)
+    prompt_key = "repeat" if data.get("existing_user") else "ask"
+    await update_dialog_message(
+        callback,
+        context,
+        localized_phrases["registration"]["name"][prompt_key],
+    )
 
 
 @router.message(RegistrationState.name)
@@ -48,7 +86,7 @@ async def set_name(message: Message, state: FSMContext, context: CoreContext, ph
 
     await state.update_data(name=cleaned_name)
     await state.set_state(RegistrationState.sex)
-    await update_dialog_message(message, context, phrases["registration"]["sex"], reply_markup=keyboards.sex_keyboard())
+    await update_dialog_message(message, context, phrases["registration"]["sex"], reply_markup=keyboards.sex_keyboard(phrases))
 
 
 @router.callback_query(RegistrationState.sex, F.data.startswith("sex:"))
@@ -56,7 +94,9 @@ async def set_sex(callback: CallbackQuery, state: FSMContext, context: CoreConte
     await callback.answer()
     sex_value = callback.data.split(":", maxsplit=1)[1]
     if sex_value not in {"M", "F"}:
-        await update_dialog_message(callback, context, phrases["registration"]["sex_invalid"], reply_markup=keyboards.sex_keyboard())
+        await update_dialog_message(
+            callback, context, phrases["registration"]["sex_invalid"], reply_markup=keyboards.sex_keyboard(phrases)
+        )
         return
 
     await state.update_data(sex=sex_value)
@@ -65,7 +105,7 @@ async def set_sex(callback: CallbackQuery, state: FSMContext, context: CoreConte
         callback,
         context,
         phrases["registration"]["search_sex"],
-        reply_markup=keyboards.search_sex_keyboard(),
+        reply_markup=keyboards.search_sex_keyboard(phrases),
     )
 
 
@@ -78,7 +118,7 @@ async def set_search_sex(callback: CallbackQuery, state: FSMContext, context: Co
             callback,
             context,
             phrases["registration"]["search_sex_invalid"],
-            reply_markup=keyboards.search_sex_keyboard(),
+            reply_markup=keyboards.search_sex_keyboard(phrases),
         )
         return
 
@@ -137,7 +177,7 @@ async def set_description(message: Message, state: FSMContext, context: CoreCont
         message,
         context,
         phrases["registration"]["photos"],
-        reply_markup=keyboards.photos_keyboard(has_photos=False),
+        reply_markup=keyboards.photos_keyboard(phrases, has_photos=False),
     )
 
 
@@ -151,7 +191,7 @@ async def set_photos(message: Message, state: FSMContext, context: CoreContext, 
             message,
             context,
             phrases["registration"]["photos_invalid"],
-            reply_markup=keyboards.photos_keyboard(has_photos=bool(photo_ids)),
+            reply_markup=keyboards.photos_keyboard(phrases, has_photos=bool(photo_ids)),
         )
         return
 
@@ -162,7 +202,7 @@ async def set_photos(message: Message, state: FSMContext, context: CoreContext, 
         message,
         context,
         phrases["registration"]["photos_saved"],
-        reply_markup=keyboards.photos_keyboard(has_photos=True),
+        reply_markup=keyboards.photos_keyboard(phrases, has_photos=True),
     )
 
 
@@ -177,7 +217,7 @@ async def finish_photos(callback: CallbackQuery, state: FSMContext, context: Cor
             callback,
             context,
             phrases["registration"]["photos_missing_on_finish"],
-            reply_markup=keyboards.photos_keyboard(has_photos=False),
+            reply_markup=keyboards.photos_keyboard(phrases, has_photos=False),
         )
         return
 
@@ -187,6 +227,7 @@ async def finish_photos(callback: CallbackQuery, state: FSMContext, context: Cor
         name=data["name"],
         sex=data["sex"],
         search_sex=data["search_sex"],
+        language=data.get("language", "ru"),
         age=data["age"],
         faculty_id=data["faculty_id"],
         description=data["description"],
@@ -197,6 +238,6 @@ async def finish_photos(callback: CallbackQuery, state: FSMContext, context: Cor
         callback,
         context,
         phrases["registration"]["completed"],
-        reply_markup=keyboards.main_menu(),
+        reply_markup=keyboards.main_menu(phrases),
     )
 

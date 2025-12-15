@@ -36,6 +36,7 @@ class UserModel(Base):
     name = Column(String, nullable=False)
     sex = Column(String(1), nullable=False)
     search_sex = Column(String(1), nullable=False)
+    language = Column(String(2), nullable=False, default="ru")
     age = Column(Integer, nullable=False)
     description = Column(Text, nullable=True)
     faculty_id = Column(String, ForeignKey("faculties.id"), nullable=False)
