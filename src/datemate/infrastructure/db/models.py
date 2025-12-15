@@ -35,6 +35,7 @@ class UserModel(Base):
     telegram_id = Column(BigInteger, nullable=False, unique=True, index=True)
     name = Column(String, nullable=False)
     sex = Column(String(1), nullable=False)
+    search_sex = Column(String(1), nullable=False)
     age = Column(Integer, nullable=False)
     description = Column(Text, nullable=True)
     faculty_id = Column(String, ForeignKey("faculties.id"), nullable=False)

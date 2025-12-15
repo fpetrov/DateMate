@@ -11,6 +11,7 @@ from redis.asyncio import Redis
 from datemate.config import load_settings
 from datemate.domain.db import create_engine, init_db
 from datemate.tgbot.functional import Phrases
+from datemate.tgbot.handlers.matchmaking import router as matchmaking_router
 from datemate.tgbot.handlers.registration import router as registration_router
 from datemate.tgbot.middlewares.db import DbSessionMiddleware
 from datemate.tgbot.middlewares.interface import InterfaceMiddleware
@@ -32,6 +33,7 @@ async def main() -> None:
     bot = Bot(settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=storage)
     dp.include_router(registration_router)
+    dp.include_router(matchmaking_router)
 
     dp.message.middleware(DbSessionMiddleware(session_factory))
     dp.callback_query.middleware(DbSessionMiddleware(session_factory))

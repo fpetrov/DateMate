@@ -34,20 +34,24 @@ class UserRepository:
         )
         return result.scalars().first()
 
-    async def upsert_user(self,
-                          telegram_id: int,
-                          name: str,
-                          sex: str,
-                          age: int,
-                          faculty_id: str,
-                          description: str,
-                          photo_ids: list[str]) -> UserModel:
+    async def upsert_user(
+        self,
+        telegram_id: int,
+        name: str,
+        sex: str,
+        search_sex: str,
+        age: int,
+        faculty_id: str,
+        description: str,
+        photo_ids: list[str],
+    ) -> UserModel:
         user = await self.get_by_telegram_id(telegram_id)
         if user is None:
             user = UserModel(
                 telegram_id=telegram_id,
                 name=name,
                 sex=sex,
+                search_sex=search_sex,
                 age=age,
                 description=description,
                 faculty_id=faculty_id,
@@ -57,6 +61,7 @@ class UserRepository:
 
         user.name = name
         user.sex = sex
+        user.search_sex = search_sex
         user.age = age
         user.description = description
         user.faculty_id = faculty_id
@@ -71,18 +76,26 @@ class MatchRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_next_candidate(self, user_id: int) -> UserModel | None:
-        rated_subquery = select(LikeModel.target_id).where(LikeModel.liker_id == user_id)
+    async def get_next_candidate(self, user: UserModel) -> UserModel | None:
+        rated_subquery = select(LikeModel.target_id).where(LikeModel.liker_id == user.id)
+
+        base_conditions = [
+            UserModel.id != user.id,
+            ~UserModel.id.in_(rated_subquery),
+            UserModel.search_sex == user.sex,
+        ]
+
+        if user.search_sex:
+            base_conditions.append(UserModel.sex == user.search_sex)
 
         prioritized_stmt = (
             select(UserModel)
             .join(LikeModel, LikeModel.liker_id == UserModel.id)
             .options(selectinload(UserModel.faculty))
             .where(
-                LikeModel.target_id == user_id,
+                LikeModel.target_id == user.id,
                 LikeModel.is_like.is_(True),
-                UserModel.id != user_id,
-                ~UserModel.id.in_(rated_subquery),
+                *base_conditions,
             )
             .order_by(func.random())
             .limit(1)
@@ -95,7 +108,7 @@ class MatchRepository:
         stmt = (
             select(UserModel)
             .options(selectinload(UserModel.faculty))
-            .where(UserModel.id != user_id, ~UserModel.id.in_(rated_subquery))
+            .where(*base_conditions)
             .order_by(func.random())
             .limit(1)
         )

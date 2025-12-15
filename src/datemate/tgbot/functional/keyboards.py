@@ -25,6 +25,15 @@ def sex_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def search_sex_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="Парня", callback_data="search_sex:M"),
+        InlineKeyboardButton(text="Девушку", callback_data="search_sex:F"),
+    )
+    return builder.as_markup()
+
+
 def faculty_keyboard(faculties: list[Faculty]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for faculty in faculties:
