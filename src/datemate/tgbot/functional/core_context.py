@@ -158,3 +158,4 @@ class CoreContext:
 
     async def update_language(self, language: str):
         await self.state.update_data({self.LANGUAGE_KEY: language})
+        self.data[self.LANGUAGE_KEY] = language

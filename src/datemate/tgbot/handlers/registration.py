@@ -29,12 +29,28 @@ class RegistrationState(StatesGroup):
 @router.callback_query(F.data == "action:register")
 async def start_registration(callback: CallbackQuery, state: FSMContext, context: CoreContext, phrases: Phrases, session) -> None:
     await callback.answer()
-    await state.set_state(RegistrationState.language)
     user_repo = UserRepository(session)
     user = await user_repo.get_by_telegram_id(callback.from_user.id)
+    data = await state.get_data()
     await state.update_data(existing_user=bool(user))
+    language = data.get("language")
+
     if user:
-        await state.update_data(language=user.language)
+        language = user.language
+        await state.update_data(language=language)
+        await context.update_language(language)
+
+    if language:
+        await state.set_state(RegistrationState.name)
+        prompt_key = "repeat" if user else "ask"
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["registration"]["name"][prompt_key],
+        )
+        return
+
+    await state.set_state(RegistrationState.language)
     prompt = phrases["registration"]["language"]["ask"]
     await update_dialog_message(callback, context, prompt, reply_markup=keyboards.language_keyboard(phrases))
 
@@ -224,6 +240,7 @@ async def finish_photos(callback: CallbackQuery, state: FSMContext, context: Cor
     user_repo = UserRepository(session)
     await user_repo.upsert_user(
         telegram_id=callback.from_user.id,
+        username=callback.from_user.username,
         name=data["name"],
         sex=data["sex"],
         search_sex=data["search_sex"],

@@ -33,18 +33,33 @@ def _search_sex_label(search_sex: str | None, phrases: Phrases) -> str:
     return phrases["profile"]["search_values"]["any"]
 
 
-def format_profile_caption(user, match_time: datetime | None = None, phrases: Phrases | None = None) -> str:
+def format_profile_caption(
+    user,
+    match_time: datetime | None = None,
+    phrases: Phrases | None = None,
+    username: str | None = None,
+) -> str:
     phrases = phrases or Phrases()
     faculty_name = user.faculty.name if getattr(user, "faculty", None) else "—"
 
-    caption_lines = [
-        f"{user.name}, {user.age}",
-        f"{phrases['profile']['sex_label']}: {_sex_label(user.sex, phrases)}",
-        f"{phrases['profile']['search_label']}: {_search_sex_label(getattr(user, 'search_sex', None), phrases)}",
-        f"{phrases['profile']['faculty_label']}: {faculty_name}",
-        "",
-        user.description or "",
-    ]
+    caption_lines = [f"{user.name}, {user.age}"]
+
+    if username or match_time is not None:
+        caption_lines.append(
+            phrases["profile"]["username_label"].format(username=username)
+            if username
+            else phrases["profile"]["username_missing"]
+        )
+
+    caption_lines.extend(
+        [
+            f"{phrases['profile']['sex_label']}: {_sex_label(user.sex, phrases)}",
+            f"{phrases['profile']['search_label']}: {_search_sex_label(getattr(user, 'search_sex', None), phrases)}",
+            f"{phrases['profile']['faculty_label']}: {faculty_name}",
+            "",
+            user.description or "",
+        ]
+    )
 
     if match_time:
         caption_lines.extend(["", match_time.strftime(phrases["profile"]["match_time_format"])])
@@ -59,8 +74,9 @@ async def show_profile(
     phrases: Phrases,
     reply_markup=None,
     match_time: datetime | None = None,
+    username: str | None = None,
 ):
-    caption = format_profile_caption(user, match_time=match_time, phrases=phrases)
+    caption = format_profile_caption(user, match_time=match_time, phrases=phrases, username=username)
     if user.photos:
         await context.respond_photo(
             event,

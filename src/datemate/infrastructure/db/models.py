@@ -39,6 +39,7 @@ class UserModel(Base):
     language = Column(String(2), nullable=False, default="ru")
     age = Column(Integer, nullable=False)
     description = Column(Text, nullable=True)
+    username = Column(String, nullable=True)
     faculty_id = Column(String, ForeignKey("faculties.id"), nullable=False)
     faculty = relationship(FacultyModel, back_populates="users")
     photo_ids = Column(Text, nullable=False)

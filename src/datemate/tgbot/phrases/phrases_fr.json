@@ -59,6 +59,8 @@
       "female": "Une femme",
       "any": "N'importe qui"
     },
+    "username_label": "Telegram : {username}",
+    "username_missing": "Telegram : —",
     "faculty_label": "Faculté",
     "match_time_format": "Match : %d.%m.%Y %H:%M"
   },

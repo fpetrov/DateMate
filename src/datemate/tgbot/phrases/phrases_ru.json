@@ -59,6 +59,8 @@
       "female": "Девушку",
       "any": "Кого угодно"
     },
+    "username_label": "Телеграм: {username}",
+    "username_missing": "Телеграм: —",
     "faculty_label": "Факультет",
     "match_time_format": "Совпадение: %d.%m.%Y %H:%M"
   },

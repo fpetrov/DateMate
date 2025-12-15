@@ -37,6 +37,7 @@ class UserRepository:
     async def upsert_user(
         self,
         telegram_id: int,
+        username: str | None,
         name: str,
         sex: str,
         search_sex: str,
@@ -50,6 +51,7 @@ class UserRepository:
         if user is None:
             user = UserModel(
                 telegram_id=telegram_id,
+                username=username,
                 name=name,
                 sex=sex,
                 search_sex=search_sex,
@@ -68,6 +70,7 @@ class UserRepository:
         user.age = age
         user.description = description
         user.faculty_id = faculty_id
+        user.username = username or user.username
         user.photos = photo_ids
 
         await self.session.commit()

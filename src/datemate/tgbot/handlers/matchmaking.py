@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from aiogram import F, Router
 from aiogram.filters import CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery, Message
 
 from datemate.domain.repositories import MatchRepository, UserRepository
@@ -14,6 +17,10 @@ from datemate.tgbot.handlers.common import (
 )
 
 router = Router()
+
+
+class OnboardingState(StatesGroup):
+    language = State()
 
 
 async def _show_next_candidate(
@@ -77,22 +84,63 @@ async def _show_match_by_index(
         return
 
     match, other_user = pairs[0]
+    username = await _resolve_username(other_user, context)
     await show_profile(
         event,
         context,
         other_user,
         phrases,
         match_time=match.created_at,
+        username=username,
         reply_markup=keyboards.matches_navigation(phrases, safe_index, total),
     )
 
 
+async def _resolve_username(user, context: CoreContext) -> str | None:
+    username = getattr(user, "username", None)
+    if username:
+        return f"@{username.lstrip('@')}"
+
+    if context.bot is None:
+        return None
+
+    try:
+        chat = await context.bot.get_chat(user.telegram_id)
+    except TelegramBadRequest:
+        return None
+
+    return f"@{chat.username}" if chat.username else None
+
+
 @router.message(CommandStart())
-async def cmd_start(message: Message, state, context: CoreContext, phrases: Phrases, session) -> None:
+async def cmd_start(
+    message: Message,
+    state: FSMContext,
+    context: CoreContext,
+    phrases: Phrases,
+    session,
+    phrases_provider: Phrases,
+) -> None:
     await context.delete_core_message()
     user_repo = UserRepository(session)
     user = await user_repo.get_by_telegram_id(message.from_user.id)
-    await show_main_menu(message, context, phrases, is_registered=user is not None)
+
+    if user:
+        await context.update_language(user.language)
+    elif not context.language_defined():
+        await state.set_state(OnboardingState.language)
+        await update_dialog_message(
+            message,
+            context,
+            phrases["registration"]["language"]["ask"],
+            reply_markup=keyboards.language_keyboard(phrases),
+        )
+        return
+
+    localized_phrases = phrases_provider.for_language(
+        user.language if user else (context.get_language() if context.language_defined() else None)
+    )
+    await show_main_menu(message, context, localized_phrases, is_registered=user is not None)
 
 
 @router.callback_query(F.data == "action:menu")
@@ -101,6 +149,46 @@ async def back_to_menu(callback: CallbackQuery, state, context: CoreContext, phr
     user_repo = UserRepository(session)
     user = await user_repo.get_by_telegram_id(callback.from_user.id)
     await show_main_menu(callback, context, phrases, is_registered=user is not None)
+
+
+@router.callback_query(OnboardingState.language)
+async def set_initial_language(
+    callback: CallbackQuery,
+    state: FSMContext,
+    context: CoreContext,
+    phrases: Phrases,
+    phrases_provider: Phrases,
+    session,
+) -> None:
+    await callback.answer()
+    if not callback.data or not callback.data.startswith("language:"):
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["registration"]["language"]["invalid"],
+            reply_markup=keyboards.language_keyboard(phrases),
+        )
+        return
+
+    language_code = callback.data.split(":", maxsplit=1)[1]
+    if language_code not in {"ru", "en", "fr"}:
+        await update_dialog_message(
+            callback,
+            context,
+            phrases["registration"]["language"]["invalid"],
+            reply_markup=keyboards.language_keyboard(phrases),
+        )
+        return
+
+    await state.update_data(language=language_code)
+    await context.update_language(language_code)
+    await state.set_state(None)
+
+    localized_phrases = phrases_provider.for_language(language_code)
+    user_repo = UserRepository(session)
+    user = await user_repo.get_by_telegram_id(callback.from_user.id)
+
+    await show_main_menu(callback, context, localized_phrases, is_registered=user is not None)
 
 
 @router.callback_query(F.data == "action:search")
