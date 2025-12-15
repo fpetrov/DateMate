@@ -133,6 +133,7 @@ class CoreContext:
                 return core_message
             except TelegramBadRequest:
                 caption_to_send = fallback
+                await self.delete_core_message()
 
         new_message = await self.bot.send_photo(
             message.chat.id,

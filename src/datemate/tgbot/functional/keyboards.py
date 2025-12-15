@@ -12,6 +12,7 @@ def main_menu() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="🚀 Заполнить анкету", callback_data="action:register"),
         InlineKeyboardButton(text="❤️ Смотреть анкеты", callback_data="action:search"),
     )
+    builder.row(InlineKeyboardButton(text="💌 Мои мэтчи", callback_data="action:matches"))
     return builder.as_markup()
 
 
@@ -46,7 +47,7 @@ def candidate_actions(candidate_id: str) -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="👎 Пропустить", callback_data=f"rate:skip:{candidate_id}"),
         InlineKeyboardButton(text="❤️ Лайк", callback_data=f"rate:like:{candidate_id}"),
     )
-    builder.row(InlineKeyboardButton(text="➡️ Дальше", callback_data="search:next"))
+    builder.row(InlineKeyboardButton(text="➡️ Дальше", callback_data=f"search:next:{candidate_id}"))
     return builder.as_markup()
 
 
@@ -63,4 +64,22 @@ def verify_actions(request_id: str) -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject:{request_id}"),
     )
     builder.row(InlineKeyboardButton(text="🔄 Обновить список", callback_data="verify:refresh"))
+    return builder.as_markup()
+
+
+def matches_navigation(current_index: int, total: int) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    if total:
+        builder.row(
+            InlineKeyboardButton(
+                text="⬅️", callback_data=f"matches:page:{max(current_index - 1, 0)}"
+            ),
+            InlineKeyboardButton(text=f"{current_index + 1}/{total}", callback_data="matches:noop"),
+            InlineKeyboardButton(
+                text="➡️",
+                callback_data=f"matches:page:{min(current_index + 1, total - 1)}",
+            ),
+        )
+
+    builder.row(InlineKeyboardButton(text="⬅️ В меню", callback_data="action:menu"))
     return builder.as_markup()
