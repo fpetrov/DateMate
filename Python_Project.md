@@ -34,9 +34,21 @@
 
 ## 4. База данных
 
-- **Инициализация.** При старте `init_db` создает таблицы и записывает дефолтные факультеты ВШЭ (`fkn`, `fen`, `vsb`, `fgn`).
-- **Хранение фото.** `UserModel.photo_ids` — текстовое поле с JSON-массивом file_id Telegram.
-- **Мэтчи.** Пара хранится в отсортированном виде (`user_left_id <= user_right_id`) с ограниченнием, при этом пользователю в ленте попадаются сначала люди, которые его уже лайкнули, чтобы мэтчи могли происходить быстрее.
+- **Инициализация и данные по умолчанию.** `init_db` прогоняет `Base.metadata.create_all` для моделей SQLAlchemy, а затем выборкой `select(FacultyModel.id)` собирает уже существующие факультеты и досоздаёт недостающие (`fkn`, `fen`, `vsb`, `fgn`) через `session.add(...)` + `commit()`.
+- **Схема таблиц.**
+  - `faculties(id PK, name UNIQUE)` ↔ `users.faculty_id` (FK, `relationship` в обе стороны).
+  - `users(id PK, telegram_id UNIQUE+index, sex/search_sex CHAR(1), language CHAR(2), username nullable, description text, photo_ids text-json, created_at отсутствует — опираемся на ID, а не на время). Фото сериализуются/десериализуются через `UserModel.photos` property (`json.dumps/json.loads`).
+  - `likes(id PK, liker_id FK -> users.id, target_id FK -> users.id, is_like BOOL, created_at TIMESTAMPTZ, UniqueConstraint(liker_id, target_id))`.
+  - `matches(id PK, user_left_id FK -> users.id, user_right_id FK -> users.id, UniqueConstraint(user_left_id, user_right_id), created_at TIMESTAMPTZ)`.
+- **Запросы и бизнес-логика (declarative/query API).**
+  - `FacultyRepository.list_faculties`/`get_by_id` — простые `select(FacultyModel)` и `where(FacultyModel.id == ...)`.
+  - `UserRepository.get_by_telegram_id`/`get_by_id` — `select(UserModel).where(...)` с `selectinload(UserModel.faculty)` для подгрузки факультета; `upsert_user` ищет пользователя, при отсутствии создаёт `UserModel(...)`, обновляет поля (sex/search_sex/language/age/faculty/description/username/photos) и делает `commit()+refresh`.
+  - `MatchRepository.get_next_candidate` — формирует сабзапрос `rated_subquery = select(LikeModel.target_id).where(LikeModel.liker_id == user.id)` для исключения уже оценённых; базовые условия: другой пользователь, не в `rated_subquery`, совпадение поисковых параметров (`UserModel.search_sex == user.sex`, `UserModel.sex == user.search_sex`). Приоритетный запрос делает `join(LikeModel, LikeModel.liker_id == UserModel.id)` + `where(LikeModel.target_id == user.id, LikeModel.is_like == True, *base_conditions)` и выдаёт случайную запись `order_by(func.random()).limit(1)`. Если приоритетного кандидата нет — падает на простой `select(UserModel).where(*base_conditions).order_by(func.random()).limit(1)`.
+  - `MatchRepository.set_reaction` — проверяет существующую пару `select(LikeModel).where(liker_id == ..., target_id == ...)`, обновляет флаг или создаёт новую запись, коммитит и `refresh`. При `is_like=True` проверяет встречный лайк `_has_positive_reaction` (`select ... is_like == True`) и, если он есть, создаёт мэтч через `_ensure_match`.
+  - `_ensure_match` сортирует идентификаторы (`left_id, right_id = sorted((user_a_id, user_b_id))`) и проверяет уникальность `select(MatchModel).where(user_left_id == left_id, user_right_id == right_id)` перед вставкой, чтобы не дублировать пары при разных порядках лайков.
+  - `count_matches` — `select(func.count()).select_from(MatchModel).where(or_(user_left_id == user, user_right_id == user))`.
+  - `list_matches` — пагинированный `select(MatchModel).where(...).order_by(created_at.desc()).offset(offset).limit(limit)`, затем отдельный `select(UserModel).where(UserModel.id.in_(other_user_ids))` с `selectinload(faculty)`, сборка пар `(match, other_user)` в памяти.
+- **Порядок выдачи мэтчей/кандидатов.** Благодаря join по лайкам кандидаты, уже лайкнувшие текущего пользователя, выдаются первыми; записи в `matches` хранятся в отсортированном виде (`user_left_id < user_right_id`), что упрощает уникальность и дальнейшие запросы.
 
 ```mermaid
 erDiagram
