@@ -34,9 +34,17 @@
 
 ## 4. База данных
 
-- **Инициализация.** При старте `init_db` создает таблицы и записывает дефолтные факультеты ВШЭ (`fkn`, `fen`, `vsb`, `fgn`).
-- **Хранение фото.** `UserModel.photo_ids` — текстовое поле с JSON-массивом file_id Telegram.
-- **Мэтчи.** Пара хранится в отсортированном виде (`user_left_id <= user_right_id`) с ограниченнием, при этом пользователю в ленте попадаются сначала люди, которые его уже лайкнули, чтобы мэтчи могли происходить быстрее.
+- **Инициализация + дефолтные данные**
+  `init_db` прогоняет `Base.metadata.create_all` для моделей SQLAlchemy, а затем выборкой `select(FacultyModel.id)` делает дефолтные факультеты (`ФКН`, `ФЭН`, `ВШБ`, `ФГН`) через `session.add()` + `commit()`.
+- **Запросы и репозитории**
+  - `FacultyRepository.list_faculties`/`get_by_id` — просто `select(FacultyModel)` и `where(FacultyModel.id == ...)`.
+  - `UserRepository.get_by_telegram_id`/`get_by_id` — `select(UserModel).where(...)` с `selectinload(UserModel.faculty)` для подгрузки факультета, `upsert_user` ищет пользователя, при отсутствии создает `UserModel()`, обновляет поля модели пользователя и делает `commit() + refresh`.
+  - `MatchRepository.get_next_candidate` — формирует запрос `rated_subquery = select(LikeModel.target_id).where(LikeModel.liker_id == user.id)` для того, чтобы уже убрать оцененных, у нас в боте вообще такие условия: другой пользователь, не в `rated_subquery`, совпадение параметров (`UserModel.search_sex == user.sex`, `UserModel.sex == user.search_sex`), то есть что пол анкеты совпадает с тем, что ищет человек. Потом делаем `join(LikeModel, LikeModel.liker_id == UserModel.id)` + `where(LikeModel.target_id == user.id, LikeModel.is_like == True, *base_conditions)` и выдаем случайную запись `order_by(func.random()).limit(1)`. Если приоритетного кандидата нет — падает на простой `select(UserModel).where(*base_conditions).order_by(func.random()).limit(1)`.
+  - `MatchRepository.set_reaction` — проверяет существующую пару `select(LikeModel).where(liker_id == ..., target_id == ...)`, обновляет флаг или создает новую запись, коммитит и `refresh`. При `is_like=True` проверяет встречный лайк `_has_positive_reaction` (`select ... is_like == True`) и, если он есть, создает мэтч через `_ensure_match`.
+  - `_ensure_match` сортирует идентификаторы (`left_id, right_id = sorted((user_a_id, user_b_id))`) и проверяет уникальность `select(MatchModel).where(user_left_id == left_id, user_right_id == right_id)` перед вставкой, чтобы не дублировать пары при разных порядках лайков.
+  - `count_matches` — `select(func.count()).select_from(MatchModel).where(or_(user_left_id == user, user_right_id == user))`.
+  - `list_matches` — пагинированный `select(MatchModel).where(...).order_by(created_at.desc()).offset(offset).limit(limit)`, затем отдельный `select(UserModel).where(UserModel.id.in_(other_user_ids))` с `selectinload(faculty)`, сборка пар `(match, other_user)` в памяти.
+- **Порядок выдачи мэтчей/кандидатов.** Благодаря join по лайкам кандидаты, уже лайкнувшие текущего пользователя, выдаются первыми, при этом записи в `matches` хранятся в отсортированном виде (`user_left_id < user_right_id`).
 
 ```mermaid
 erDiagram
