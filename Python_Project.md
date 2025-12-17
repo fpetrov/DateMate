@@ -174,7 +174,7 @@ flowchart TD
     search --> age[Сообщение с возрастом]
     age --> faculty[Кнопки факультетов из DB]
     faculty --> descr[Сообщение-описание]
-    descr --> photos[Загрузка фото (копятся в FSM)]
+    descr --> photos["Загрузка фото (копятся в FSM)"]
     photos --> done{photos:done}
     done -- нет фото --> photos
     done -- есть фото --> save_db[upsert_user в БД]
