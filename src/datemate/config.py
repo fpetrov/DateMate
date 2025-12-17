@@ -1,16 +1,14 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from dotenv import load_dotenv
 
 
 class Settings(BaseSettings):
-    bot_token: str = Field(..., env="BOT_TOKEN")
-    redis_url: str = Field(..., env="REDIS_URL")
-    database_url: str = Field(..., env="DATABASE_URL")
+    bot_token: str = Field(...)
+    redis_url: str = Field(...)
+    database_url: str = Field(...)
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 def load_settings() -> Settings:

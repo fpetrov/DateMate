@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 from aiogram.exceptions import TelegramBadRequest
@@ -28,7 +28,7 @@ class FakeMessage:
     def __init__(self, chat_id: int, message_id: int = 1, text: str | None = None, from_user_id: int | None = None, photo=None, date=None):
         self.chat = SimpleNamespace(id=chat_id)
         self.message_id = message_id
-        self.date = date or datetime.utcnow()
+        self.date = date or datetime.now(timezone.utc)
         self.from_user = SimpleNamespace(id=from_user_id or chat_id + 1, username="user")
         self.text = text
         self.photo = photo or []
