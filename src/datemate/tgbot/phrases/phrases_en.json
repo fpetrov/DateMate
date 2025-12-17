@@ -1,0 +1,103 @@
+{
+  "menu": {
+    "unregistered": "👋🏻 Hi! Let's fill out your profile to start matching.",
+    "registered": "📝 Menu. You can update your profile or return to discovery."
+  },
+  "registration": {
+    "language": {
+      "ask": "🌐 Choose the language you'd like to use:",
+      "invalid": "❌ Please pick a language using the buttons below."
+    },
+    "name": {
+      "ask": "What's your name? Type it in.",
+      "repeat": "Let's update your profile. Enter a new name if you want to change it.",
+      "invalid": "❌ Looks like the name format is invalid. Use only letters, spaces, or dashes."
+    },
+    "sex": "Choose your gender:",
+    "sex_invalid": "❌ Use the buttons below to choose your gender.",
+    "search_sex": "Who are you looking for? Pick the gender of profiles:",
+    "search_sex_invalid": "❌ Choose who you're looking for using the buttons below.",
+    "age": "How old are you? Enter a number.",
+    "age_invalid": "❌ Enter an age between 16 and 100.",
+    "faculty": "Select your faculty:",
+    "faculty_invalid": "❌ This faculty isn't in the list. Please use the keyboard options.",
+    "description": "Tell us about yourself in a few words.",
+    "description_invalid": "❌ Describe yourself in at least a few words.",
+    "photos": "Send your photos one by one. You can upload several images and then press \"Done\".",
+    "photos_saved": "📸 Photo saved. Send more or press \"Done\".",
+    "photos_invalid": "❌ Please send a photo. Upload an image or press \"Done\" if you're finished.",
+    "photos_missing_on_finish": "❌ Add at least one photo to finish your profile.",
+    "completed": "✅ Profile saved! What next?"
+  },
+  "search": {
+    "not_registered": "Fill in your profile first to view others.",
+    "loading": "🔎 Looking for interesting profiles for you...",
+    "no_candidates": "No available profiles right now. Check back later or refresh your own!",
+    "candidate_not_found": "This profile is no longer available. Try refreshing the search.",
+    "like_saved": "❤️ Like recorded!",
+    "skip_saved": "Profile skipped.",
+    "match": "🎉 It's a match! Check your matches list in the menu.",
+    "own_profile": "That's your own profile — I'll show someone else."
+  },
+  "matches": {
+    "not_registered": "Complete your profile first to get matches.",
+    "empty": "No matches yet. Like profiles to get some!",
+    "not_available": "Couldn't load this match. Try again later.",
+    "out_of_range": "No more profiles in that direction.",
+    "title": "Your matches:"
+  },
+  "profile": {
+    "sex_label": "Gender",
+    "sex_values": {
+      "male": "Male",
+      "female": "Female",
+      "unknown": "—"
+    },
+    "search_label": "Looking for",
+    "search_values": {
+      "male": "A man",
+      "female": "A woman",
+      "any": "Anyone"
+    },
+    "username_label": "Telegram: {username}",
+    "username_missing": "Telegram: —",
+    "faculty_label": "Faculty",
+    "match_time_format": "Match: %d.%m.%Y %H:%M"
+  },
+  "keyboards": {
+    "menu": {
+      "register": "🚀 Fill the profile",
+      "search": "❤️ Browse profiles",
+      "matches": "💌 My matches"
+    },
+    "sex": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "search_sex": {
+      "male": "A man",
+      "female": "A woman"
+    },
+    "photos": {
+      "done": "✅ Done"
+    },
+    "candidate": {
+      "skip": "👎 Skip",
+      "like": "❤️ Like",
+      "next": "➡️ Next"
+    },
+    "back_to_menu": "⬅️ To menu",
+    "verify": {
+      "approve": "✅ Approve",
+      "reject": "❌ Reject",
+      "refresh": "🔄 Refresh list"
+    },
+    "language": {
+      "ru": "🇷🇺 Russian",
+      "en": "🇬🇧 English",
+      "fr": "🇫🇷 Français"
+    }
+  },
+  "return_to_menu": "🔙 Press /start to return to the menu",
+  "undefined_command": "😔 I don't understand you, use /start to return to the menu"
+}

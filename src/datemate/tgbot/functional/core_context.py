@@ -78,7 +78,7 @@ class CoreContext:
     ) -> CoreMessage:
         message = self._event_message(event)
         target_text = text
-        fallback = fallback_text or self.fallback_text
+        fallback = fallback_text if fallback_text is not None else text
 
         if self.message_exists():
             core_message = self.get_message()
@@ -92,9 +92,13 @@ class CoreContext:
                     disable_web_page_preview=disable_web_page_preview,
                 )
                 return core_message
-            except TelegramBadRequest as e:
-                logging.error(e.message)
+            except TelegramBadRequest as text_error:
+                logging.error(text_error.message)
+                if text_error.message == "Bad Request: message is not modified":
+                    return core_message
+
                 target_text = fallback
+                await self.delete_core_message()
 
         logging.log(level=logging.WARNING, msg=f"Creating a new message to {target_text}...")
         new_message = await self.bot.send_message(
@@ -133,6 +137,7 @@ class CoreContext:
                 return core_message
             except TelegramBadRequest:
                 caption_to_send = fallback
+                await self.delete_core_message()
 
         new_message = await self.bot.send_photo(
             message.chat.id,
@@ -153,3 +158,4 @@ class CoreContext:
 
     async def update_language(self, language: str):
         await self.state.update_data({self.LANGUAGE_KEY: language})
+        self.data[self.LANGUAGE_KEY] = language

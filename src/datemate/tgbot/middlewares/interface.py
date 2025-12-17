@@ -5,6 +5,7 @@ from aiogram import BaseMiddleware, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+from datemate.domain.repositories import UserRepository
 from datemate.tgbot.functional import CoreContext, CoreMessage, Phrases
 
 
@@ -21,7 +22,21 @@ class InterfaceMiddleware(BaseMiddleware):
     ) -> Any | None:
         state: FSMContext = data["state"]
         bot: Bot = data["bot"]
-        phrases: Phrases = data.get("phrases", self.phrases)
+        phrases_provider: Phrases = data.get("phrases_provider", self.phrases)
+        data["phrases_provider"] = phrases_provider
+        user_language = None
+
+        session = data.get("session")
+        if session is not None:
+            user_repo = UserRepository(session)
+            user = await user_repo.get_by_telegram_id(event.from_user.id)
+            if user:
+                user_language = getattr(user, "language", None)
+
+        state_data = await state.get_data()
+        user_language = state_data.get("language", user_language)
+
+        phrases = phrases_provider.for_language(user_language)
         data["phrases"] = phrases
         context = await CoreContext.create(bot, state, fallback_text=phrases["return_to_menu"])
         event_instance = event

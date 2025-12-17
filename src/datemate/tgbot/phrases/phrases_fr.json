@@ -1,0 +1,103 @@
+{
+  "menu": {
+    "unregistered": "👋🏻 Salut ! Remplis ton profil pour commencer à rencontrer des gens.",
+    "registered": "📝 Menu. Tu peux mettre à jour ton profil ou revenir à la recherche."
+  },
+  "registration": {
+    "language": {
+      "ask": "🌐 Choisis la langue qui te convient dans le bot :",
+      "invalid": "❌ Choisis une langue à l'aide des boutons ci-dessous."
+    },
+    "name": {
+      "ask": "Comment t'appelles-tu ? Écris ton prénom.",
+      "repeat": "Mettons à jour ton profil. Indique un nouveau nom si tu veux le changer.",
+      "invalid": "❌ Le format du nom est incorrect. Utilise seulement des lettres, des espaces ou des tirets."
+    },
+    "sex": "Choisis ton sexe :",
+    "sex_invalid": "❌ Utilise les boutons ci-dessous pour choisir le sexe.",
+    "search_sex": "Qui cherches-tu ? Choisis le sexe des profils :",
+    "search_sex_invalid": "❌ Choisis qui tu cherches grâce aux boutons ci-dessous.",
+    "age": "Quel âge as-tu ? Écris un nombre.",
+    "age_invalid": "❌ Indique un âge entre 16 et 100.",
+    "faculty": "Choisis ta faculté :",
+    "faculty_invalid": "❌ Cette faculté n'est pas dans la liste. Utilise les options du clavier.",
+    "description": "Parle de toi en quelques mots.",
+    "description_invalid": "❌ Décris-toi au moins en quelques mots.",
+    "photos": "Envoie tes photos une par une. Tu peux en ajouter plusieurs puis appuyer sur \"Terminé\".",
+    "photos_saved": "📸 Photo enregistrée. Envoie-en d'autres ou appuie sur \"Terminé\".",
+    "photos_invalid": "❌ Envoie une photo. Ajoute une image ou appuie sur \"Terminé\" si tu as fini.",
+    "photos_missing_on_finish": "❌ Ajoute au moins une photo pour terminer ton profil.",
+    "completed": "✅ Profil enregistré ! On fait quoi ensuite ?"
+  },
+  "search": {
+    "not_registered": "Remplis d'abord ton profil pour voir les autres.",
+    "loading": "🔎 Je cherche des profils intéressants pour toi...",
+    "no_candidates": "Pas de profils disponibles pour le moment. Reviens plus tard ou mets le tien à jour !",
+    "candidate_not_found": "Ce profil n'est plus disponible. Essaie de relancer la recherche.",
+    "like_saved": "❤️ J'aime pris en compte !",
+    "skip_saved": "Profil passé.",
+    "match": "🎉 C'est un match ! Consulte la liste des matchs dans le menu.",
+    "own_profile": "C'est ton propre profil — je vais en montrer un autre."
+  },
+  "matches": {
+    "not_registered": "Complète d'abord ton profil pour recevoir des matchs.",
+    "empty": "Pas encore de matchs. Like des profils pour en avoir !",
+    "not_available": "Impossible de charger ce match. Réessaie plus tard.",
+    "out_of_range": "Plus de profils dans cette direction.",
+    "title": "Tes matchs :"
+  },
+  "profile": {
+    "sex_label": "Sexe",
+    "sex_values": {
+      "male": "Homme",
+      "female": "Femme",
+      "unknown": "—"
+    },
+    "search_label": "Je cherche",
+    "search_values": {
+      "male": "Un homme",
+      "female": "Une femme",
+      "any": "N'importe qui"
+    },
+    "username_label": "Telegram : {username}",
+    "username_missing": "Telegram : —",
+    "faculty_label": "Faculté",
+    "match_time_format": "Match : %d.%m.%Y %H:%M"
+  },
+  "keyboards": {
+    "menu": {
+      "register": "🚀 Remplir le profil",
+      "search": "❤️ Voir les profils",
+      "matches": "💌 Mes matchs"
+    },
+    "sex": {
+      "male": "Homme",
+      "female": "Femme"
+    },
+    "search_sex": {
+      "male": "Un homme",
+      "female": "Une femme"
+    },
+    "photos": {
+      "done": "✅ Terminé"
+    },
+    "candidate": {
+      "skip": "👎 Passer",
+      "like": "❤️ J'aime",
+      "next": "➡️ Suivant"
+    },
+    "back_to_menu": "⬅️ Menu",
+    "verify": {
+      "approve": "✅ Valider",
+      "reject": "❌ Refuser",
+      "refresh": "🔄 Actualiser la liste"
+    },
+    "language": {
+      "ru": "🇷🇺 Русский",
+      "en": "🇬🇧 English",
+      "fr": "🇫🇷 Français"
+    }
+  },
+  "return_to_menu": "🔙 Appuie sur /start pour revenir au menu",
+  "undefined_command": "😔 Je ne te comprends pas, utilise /start pour revenir au menu"
+}
