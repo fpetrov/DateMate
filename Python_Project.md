@@ -17,7 +17,7 @@
 - **Фреймворк бота:** aiogram 3.x (asyncio)
 - **База данных:** PostgreSQL
 - **ORM:** SQLAlchemy (асинхронные сессии, `asyncpg`)
-- **Хранение состояний:** aiogram FSM (по умолчанию `MemoryStorage`; `RedisStorage` закомментирован и может быть включен при наличии Redis)
+- **Хранение состояний:** aiogram FSM (то есть `MemoryStorage`)
 - **Кэш/Throttling:** `cachetools.TTLCache` в middleware
 - **Контейнеризация:** Docker, Docker Compose
 - **Архитектура:** Domain Driven Design (DDD)
@@ -201,38 +201,20 @@ flowchart TD
 
 ---
 
-## 9. Запуск и конфигурация
-
-1. Установите зависимости приложения:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Определите переменные окружения (можно через `.env`):
-   - `BOT_TOKEN` — токен Telegram-бота
-   - `DATABASE_URL` — строка подключения SQLAlchemy (например, `postgresql+asyncpg://user:pass@localhost:5432/datemate`)
-   - `REDIS_URL` — URL Redis (используется при включении RedisStorage)
-3. Запустите бота:
-   ```bash
-   python -m datemate.main
-   ```
-   По умолчанию используется `MemoryStorage`; чтобы перейти на Redis, раскомментируйте `RedisStorage` в `main.py` и убедитесь, что Redis доступен по `REDIS_URL`.
-
----
-
 ## 10. Тестирование
 
-Проект покрыт асинхронными тестами (pytest) для доменных репозиториев, форматирования анкет и механики единственного сообщения в чате.
+Использовали pytest, вот как запускать:
 
-1. Установите dev-зависимости:
+1. dev-зависимости:
    ```bash
    pip install -r requirements-dev.txt
    ```
-2. Запустите тесты с отчетом покрытия:
+2. Сам запуск:
    ```bash
    pytest --cov=src/datemate --cov-report=term-missing
    ```
 
-Тесты используют SQLite (`sqlite+aiosqlite`) и не требуют реального PostgreSQL или Redis. Ожидаемое покрытие кода — не ниже 65%.
+В тесты используется SQLite (`sqlite+aiosqlite`).
 
 ### Поиск и мэтчи
 
