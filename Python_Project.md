@@ -164,8 +164,7 @@ sequenceDiagram
 ### Регистрация
 ```mermaid
 flowchart TD
-    start[/ /start /] --> lang{Есть язык?
-в БД или FSM?}
+    start[/start/] --> lang{Есть язык в БД или FSM?}
     lang -- нет --> pick_lang[/кнопки language:* /]
     pick_lang --> set_lang[Сохранить язык в FSM и CoreContext]
     lang -- да --> ask_name[Запрос имени]
