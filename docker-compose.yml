@@ -1,11 +1,11 @@
 services:
-  bot:
-    build: .
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
+#  bot:
+#    build: .
+#    env_file:
+#      - .env
+#    depends_on:
+#      - db
+#      - redis
   db:
     image: postgres:15
     environment:
@@ -14,7 +14,7 @@ services:
       POSTGRES_DB: datemate
     ports:
       - "5432:5432"
-  redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
+#  redis:
+#    image: redis:7
+#    ports:
+#      - "6379:6379"
