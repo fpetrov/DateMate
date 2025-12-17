@@ -19,10 +19,8 @@ class CoreContext:
     __create_key = object()
 
     def __init__(self, create_key: object):
-        assert (
-            create_key == CoreContext.__create_key,
-            "CoreContext can be created only with CoreContext.create() method!",
-        )
+        if create_key is not CoreContext.__create_key:
+            raise ValueError("CoreContext can be created only with CoreContext.create() method!")
 
         self.bot: Bot | None = None
         self.state: FSMContext | None = None

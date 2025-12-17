@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 if TYPE_CHECKING:
     from datemate.infrastructure.db.models import FacultyModel
@@ -12,8 +12,7 @@ class Faculty(BaseModel):
     id: str
     name: str
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
     @classmethod
     def from_model(cls, model: "FacultyModel") -> "Faculty":
