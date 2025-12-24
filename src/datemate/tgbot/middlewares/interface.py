@@ -5,7 +5,7 @@ from aiogram import BaseMiddleware, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from datemate.domain.repositories import UserRepository
+from datemate.infrastructure.repositories import UserRepository
 from datemate.tgbot.functional import CoreContext, CoreMessage, Phrases
 
 

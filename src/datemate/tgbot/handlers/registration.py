@@ -8,7 +8,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from datemate.domain.entities import Faculty
-from datemate.domain.repositories import FacultyRepository, UserRepository
+from datemate.infrastructure.repositories import FacultyRepository, UserRepository
 from datemate.tgbot.functional import CoreContext, Phrases, keyboards
 from datemate.tgbot.handlers.common import update_dialog_message
 
@@ -257,4 +257,3 @@ async def finish_photos(callback: CallbackQuery, state: FSMContext, context: Cor
         phrases["registration"]["completed"],
         reply_markup=keyboards.main_menu(phrases),
     )
-

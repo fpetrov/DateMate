@@ -9,7 +9,7 @@ from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio import Redis
 
 from datemate.config import load_settings
-from datemate.domain.db import create_engine, init_db
+from datemate.infrastructure.db.session import create_engine, init_db
 from datemate.tgbot.functional import Phrases
 from datemate.tgbot.handlers.matchmaking import router as matchmaking_router
 from datemate.tgbot.handlers.registration import router as registration_router

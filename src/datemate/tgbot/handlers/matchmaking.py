@@ -7,7 +7,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery, Message
 
-from datemate.domain.repositories import MatchRepository, UserRepository
+from datemate.infrastructure.repositories import MatchRepository, UserRepository
 from datemate.tgbot.functional import CoreContext, Phrases, keyboards
 from datemate.tgbot.handlers.common import (
     ensure_registered_user,
@@ -335,4 +335,3 @@ async def noop(callback: CallbackQuery) -> None:
 @router.message()
 async def undefined(message: Message, context: CoreContext, phrases: Phrases):
     await update_dialog_message(message, context, phrases["undefined_command"], reply_markup=keyboards.main_menu(phrases))
-
